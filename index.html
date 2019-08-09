@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Student and Class Maintenance</title>
+    <link rel="stylesHeet" type="text/css" href="./resources/css/ext-all.css" />
+    <script type="text/javascript" src="./adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="./js/ext-all.js"></script>
+    <script>
+        Ext.onReady(function () {
+            // menu
+            const menu = new Ext.menu.Menu({
+                items: [{
+                    id: 'updateNode',
+                    text: 'Update Name'
+                }, {
+                    id: 'addNode',
+                    text: 'Add New Item'
+                }],
+                listeners: {
+                    'itemclick': function (item) {
+                        switch (item.id) {
+                            case 'updateNode':
+                                var currentNode = item.parentMenu.contextMenu
+                                // if (currentNode.parentNode) {
+                                //     currentNode.remove()
+                                // }
+                                break;
+                            case 'addNode':
+                                var currentNode = item.parentMenu.contextMenu
+                                break
+                        }
+                    }
+                }
+            })
+
+            // selectedRoot
+            var selectedRoot = null
+
+            const root = new Ext.tree.TreeNode({
+                text: ''
+            })
+
+            var students = new Ext.tree.TreeNode({
+                text: '学生管理',
+                id: 'students-root',
+                checked: false,
+                expanded: true,
+                listeners: {
+                    'checkchange': function (node, check) {
+                        if (check) {
+                            if (selectedRoot !== null) {
+                                // debugger
+                                // console.log('000', selectedRoot.isSelected())
+                                // selectedRoot.unselect(true)
+                            }
+                            selectedRoot = node
+                            // node.appendChild(new Ext.tree.TreeNode({ text: '李四' }))
+                        } else {
+                            selectedRoot = null
+                            console.log('111', selectedRoot)
+                        }
+                        // console.log('===', node, check)
+                    }
+                }
+            })
+
+            var classes = new Ext.tree.TreeNode({
+                text: '班级管理',
+                id: 'classes-root',
+                checked: false,
+                expanded: true,
+                listeners: {
+                    'checkchange': function (node, check) {
+                        if (check) {
+                            if (selectedRoot !== null) {
+                                // debugger
+                                // console.log('000', selectedRoot.isSelected())
+                                // selectedRoot.unselect(true)
+                                // console.log('===', Ext.getCmp('students-root'))
+                            }
+                            selectedRoot = node
+                            // node.appendChild(new Ext.tree.TreeNode({ text: '教学班2' }))
+                        } else {
+                            selectedRoot = null
+                            console.log('111', selectedRoot)
+                        }
+                    }
+                }
+            })
+
+            root.appendChild(students)
+            root.appendChild(classes)
+
+            students.appendChild(new Ext.tree.TreeNode({ text: '张三' }))
+            classes.appendChild(new Ext.tree.TreeNode({ text: '教学班1' }))
+
+            var maintenanceTree = new Ext.tree.TreePanel({
+                renderTo: 'tree-region',
+                width: 400,
+                height: 400,
+                root: root,
+                rootVisible: false,
+                contextMenu: menu,
+                lines: false,
+                listeners: {
+                    'contextmenu': function (node, e) {
+                        node.select()
+                        var treeContextMenu = node.getOwnerTree().contextMenu
+                        treeContextMenu.contextMenu = node
+                        treeContextMenu.showAt(e.getXY())
+                    }
+                }
+            })
+
+            const treeEditor = new Ext.tree.TreeEditor(maintenanceTree, { allowBlank: false }, {
+                listeners: {
+                    'complete': function (editor, newValue, oldValue) {
+                        Ext.Msg.alert('提示', oldValue + ' 已被修改成 ' + newValue)
+                    }
+                }
+            })
+
+            const addForm = new Ext.FormPanel({
+                renderTo: 'add-region',
+                labelWidth: 80,
+                frame: true,
+                title: 'Add',
+                bodyStyle: 'padding:5px 5px 0',
+                width: 300,
+                items: [{
+                    fieldLabel: 'Item Name',
+                    xtype: 'textfield',
+                    name: 'item',
+                    allowBlank: false
+                }],
+                buttons: [{
+                    text: 'Add',
+                    type: 'submit',
+                    handler: function () {
+                        if (addForm.form.isValid()) {
+                            if (selectedRoot.id) {
+                                selectedRoot.appendChild(new Ext.tree.TreeNode({ text: addForm.form.findField('item').getValue() }))
+                                addForm.form.reset();
+                                return
+                            }
+                            Ext.Msg.alert('提示', '请选择要添加的项')
+                        }
+                    }
+                }]
+            });
+
+        })
+    </script>
+</head>
+
+<body>
+    <div id="tree-region" style="float: left"></div>
+    <div id="add-region" style="float: left; margin-left: 20px;"></div>
+</body>
+
+</html>
