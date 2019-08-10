@@ -20,15 +20,24 @@
                 }],
                 listeners: {
                     'itemclick': function (item) {
+                        var currentNode = item.parentMenu.contextMenu
                         switch (item.id) {
                             case 'updateNode':
-                                var currentNode = item.parentMenu.contextMenu
-                                // if (currentNode.parentNode) {
-                                //     currentNode.remove()
-                                // }
+                                treeEditor.editNode = currentNode;
+                                treeEditor.startEdit(currentNode.getUI().textNode);
                                 break;
                             case 'addNode':
-                                var currentNode = item.parentMenu.contextMenu
+                                if (currentNode.childNodes.length > 0) {
+                                    Ext.Msg.prompt('添加', '请输入要添加的内容', function (btn, content) {
+                                        if (btn === 'ok') {
+                                            // add item
+                                            var node = Ext.getCmp('main-tree').getNodeById(currentNode.id)
+                                            node.appendChild(new Ext.tree.TreeNode({text: content}))
+                                        }
+                                    })
+                                } else {
+                                    Ext.Msg.alert('提示', '该节点已经是叶子节点，不可再添加')
+                                }
                                 break
                         }
                     }
